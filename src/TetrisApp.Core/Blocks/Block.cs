@@ -3,16 +3,26 @@
 public abstract class Block
 {
     private int _rotationState;
-    private readonly Position _offset;
-    
+    private Position _offset;
+    private Position _startOffset;
+
     public abstract Position[][] Tiles { get; set; }
     public abstract int ArgbColor { get; set; }
-    public abstract string Name {get; set; }
-    protected abstract Position StartOffset { get; }
-
-    protected Block()
+    public abstract string Name { get; set; }
+    public virtual Position StartOffset
     {
-        _offset = new Position(StartOffset.Row, StartOffset.Column);
+        get => _startOffset;
+        set
+        {
+            _startOffset = value;
+            _offset = new Position(StartOffset.Row, StartOffset.Column);
+        }
+    }
+
+    public Block()
+    {
+        _offset = new Position(0, 0);
+        _startOffset = new Position(0, 0);
     }
 
     public IEnumerable<Position> TilePositions() => Tiles[_rotationState].Select(p => new Position(p.Row + _offset.Row, p.Column + _offset.Column));
@@ -43,7 +53,8 @@ public abstract class Block
     public void Reset()
     {
         _rotationState = 0;
-        _offset.Row = StartOffset.Row;
+        _offset.Row -= TilePositions().Min(p => p.Row);
         _offset.Column = StartOffset.Column;
+
     }
 }

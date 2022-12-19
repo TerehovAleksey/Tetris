@@ -7,7 +7,7 @@ public class BlockQueue
 
     public Block NextBlock { get; private set; }
 
-    public BlockQueue(IBlockStorage? blockStorage)
+    public BlockQueue(IBlockStorage? blockStorage, Position blockOffset)
     {
         _blocks.AddRange(new Block[]
         {
@@ -24,6 +24,12 @@ public class BlockQueue
         {
             _blocks.AddRange(userBlocks);
         }
+
+        foreach (var block in _blocks)
+        {
+            block.StartOffset = blockOffset;
+        }
+
         NextBlock = RandomBlock();
     }
 

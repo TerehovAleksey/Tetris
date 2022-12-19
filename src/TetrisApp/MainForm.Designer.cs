@@ -33,6 +33,10 @@ partial class MainForm
             this.LableScore = new System.Windows.Forms.Label();
             this.ButtonStart = new System.Windows.Forms.Button();
             this.SettingsGroup = new System.Windows.Forms.GroupBox();
+            this.label7 = new System.Windows.Forms.Label();
+            this.label6 = new System.Windows.Forms.Label();
+            this.label5 = new System.Windows.Forms.Label();
+            this.label4 = new System.Windows.Forms.Label();
             this.button2 = new System.Windows.Forms.Button();
             this.ButtonEditor = new System.Windows.Forms.Button();
             this.WithAcceleration = new System.Windows.Forms.CheckBox();
@@ -44,14 +48,12 @@ partial class MainForm
             this.label1 = new System.Windows.Forms.Label();
             this.NextBlockGroup = new System.Windows.Forms.GroupBox();
             this.HeldBlockGroup = new System.Windows.Forms.GroupBox();
-            this.label4 = new System.Windows.Forms.Label();
-            this.label5 = new System.Windows.Forms.Label();
-            this.label6 = new System.Windows.Forms.Label();
-            this.label7 = new System.Windows.Forms.Label();
+            this.GamePanel = new System.Windows.Forms.PictureBox();
             this.InfoPanel.SuspendLayout();
             this.SettingsGroup.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.ColumnsSelector)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.RowsSelector)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.GamePanel)).BeginInit();
             this.SuspendLayout();
             // 
             // InfoPanel
@@ -111,6 +113,42 @@ partial class MainForm
             this.SettingsGroup.TabIndex = 0;
             this.SettingsGroup.TabStop = false;
             this.SettingsGroup.Text = "Параметры игры";
+            // 
+            // label7
+            // 
+            this.label7.AutoSize = true;
+            this.label7.Location = new System.Drawing.Point(384, 153);
+            this.label7.Name = "label7";
+            this.label7.Size = new System.Drawing.Size(178, 25);
+            this.label7.TabIndex = 12;
+            this.label7.Text = "Вверх и Z - поворот";
+            // 
+            // label6
+            // 
+            this.label6.AutoSize = true;
+            this.label6.Location = new System.Drawing.Point(384, 118);
+            this.label6.Name = "label6";
+            this.label6.Size = new System.Drawing.Size(173, 25);
+            this.label6.TabIndex = 11;
+            this.label6.Text = "С - спрятать фигуру";
+            // 
+            // label5
+            // 
+            this.label5.AutoSize = true;
+            this.label5.Location = new System.Drawing.Point(384, 78);
+            this.label5.Name = "label5";
+            this.label5.Size = new System.Drawing.Size(235, 25);
+            this.label5.TabIndex = 10;
+            this.label5.Text = "Пробел - положить фигуру";
+            // 
+            // label4
+            // 
+            this.label4.AutoSize = true;
+            this.label4.Location = new System.Drawing.Point(443, 42);
+            this.label4.Name = "label4";
+            this.label4.Size = new System.Drawing.Size(109, 25);
+            this.label4.TabIndex = 9;
+            this.label4.Text = "Управление";
             // 
             // button2
             // 
@@ -257,47 +295,22 @@ partial class MainForm
             this.HeldBlockGroup.Text = "Спрятанный блок";
             this.HeldBlockGroup.Paint += new System.Windows.Forms.PaintEventHandler(this.HeldBlockGroup_Paint);
             // 
-            // label4
+            // GamePanel
             // 
-            this.label4.AutoSize = true;
-            this.label4.Location = new System.Drawing.Point(443, 42);
-            this.label4.Name = "label4";
-            this.label4.Size = new System.Drawing.Size(109, 25);
-            this.label4.TabIndex = 9;
-            this.label4.Text = "Управление";
-            // 
-            // label5
-            // 
-            this.label5.AutoSize = true;
-            this.label5.Location = new System.Drawing.Point(384, 78);
-            this.label5.Name = "label5";
-            this.label5.Size = new System.Drawing.Size(235, 25);
-            this.label5.TabIndex = 10;
-            this.label5.Text = "Пробел - положить фигуру";
-            // 
-            // label6
-            // 
-            this.label6.AutoSize = true;
-            this.label6.Location = new System.Drawing.Point(384, 118);
-            this.label6.Name = "label6";
-            this.label6.Size = new System.Drawing.Size(173, 25);
-            this.label6.TabIndex = 11;
-            this.label6.Text = "С - спрятать фигуру";
-            // 
-            // label7
-            // 
-            this.label7.AutoSize = true;
-            this.label7.Location = new System.Drawing.Point(384, 153);
-            this.label7.Name = "label7";
-            this.label7.Size = new System.Drawing.Size(178, 25);
-            this.label7.TabIndex = 12;
-            this.label7.Text = "Вверх и Z - поворот";
+            this.GamePanel.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
+            this.GamePanel.Location = new System.Drawing.Point(14, 18);
+            this.GamePanel.Name = "GamePanel";
+            this.GamePanel.Size = new System.Drawing.Size(751, 1151);
+            this.GamePanel.TabIndex = 3;
+            this.GamePanel.TabStop = false;
+            this.GamePanel.Paint += new System.Windows.Forms.PaintEventHandler(this.GamePanel_Paint);
             // 
             // MainForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(10F, 25F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(1442, 1276);
+            this.Controls.Add(this.GamePanel);
             this.Controls.Add(this.HeldBlockGroup);
             this.Controls.Add(this.NextBlockGroup);
             this.Controls.Add(this.InfoPanel);
@@ -306,7 +319,6 @@ partial class MainForm
             this.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
             this.Name = "MainForm";
             this.Text = "Тетрис";
-            this.Paint += new System.Windows.Forms.PaintEventHandler(this.MainForm_Paint);
             this.KeyUp += new System.Windows.Forms.KeyEventHandler(this.MainForm_KeyUp);
             this.InfoPanel.ResumeLayout(false);
             this.InfoPanel.PerformLayout();
@@ -314,6 +326,7 @@ partial class MainForm
             this.SettingsGroup.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)(this.ColumnsSelector)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.RowsSelector)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.GamePanel)).EndInit();
             this.ResumeLayout(false);
 
     }
@@ -339,4 +352,5 @@ partial class MainForm
     private Label label5;
     private Label label4;
     private Label label7;
+    private PictureBox GamePanel;
 }

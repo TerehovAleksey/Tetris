@@ -7,7 +7,6 @@ public partial class MainForm : Form
 {
     private int _cellSize;
     private Size _size;
-    private Point _gameFieldOffset;
     private System.Windows.Forms.Timer? _timer;
     private Game? _game;
 
@@ -29,7 +28,6 @@ public partial class MainForm : Form
     {
         _cellSize = 50;
         _size = new Size(_cellSize, _cellSize);
-        _gameFieldOffset = new Point(20, 20);
 
         _rows = (int)RowsSelector.Value;
         _columns = (int)ColumnsSelector.Value;
@@ -37,8 +35,11 @@ public partial class MainForm : Form
 
     private void InitializeSize()
     {
-        Width = _gameFieldOffset.X * 2 + (_cellSize * _columns) + InfoPanel.Width + 50;
-        Height = _gameFieldOffset.Y * 2 + (_cellSize * _rows) + 50;
+        GamePanel.Width = _cellSize * _columns;
+        GamePanel.Height = _cellSize * _rows;
+        
+        Width = GamePanel.Width + InfoPanel.Width + 100;
+        Height = GamePanel.Height + 100;
     }
 
     #region обработчики
@@ -65,14 +66,24 @@ public partial class MainForm : Form
             _timer!.Interval = Math.Max(MinDelay, MaxDelay - (_game!.Score * DelayDecrease));
         }
 
-        Invalidate();
+        GamePanel.Invalidate();
         NextBlockGroup.Invalidate();
         HeldBlockGroup.Invalidate();
     }
 
-    private void MainForm_Paint(object sender, PaintEventArgs e)
+    private void GamePanel_Paint(object sender, PaintEventArgs e)
     {
-        Draw(e.Graphics);
+        if (_game != null)
+        {
+            DrawGrid(e.Graphics, _game.GameGrid);
+            if (IsGhostEnable.Checked)
+            {
+                DrawGhostBlock(e.Graphics, _game.CurrentBlock);
+            }
+
+            DrawBlock(e.Graphics, _game.CurrentBlock);
+            LableScore.Text = $@"Результат:  {_game.Score}";
+        }
     }
 
     private void NextBlockGroup_Paint(object sender, PaintEventArgs e)
@@ -95,14 +106,14 @@ public partial class MainForm : Form
     {
         _rows = (int)RowsSelector.Value;
         InitializeSize();
-        Invalidate();
+        GamePanel.Invalidate();
     }
 
     private void ColumnsSelector_ValueChanged(object sender, EventArgs e)
     {
         _columns = (int)ColumnsSelector.Value;
         InitializeSize();
-        Invalidate();
+        GamePanel.Invalidate();
     }
 
     private void MainForm_KeyUp(object sender, KeyEventArgs e)
@@ -139,7 +150,7 @@ public partial class MainForm : Form
                 return;
         }
 
-        Invalidate();
+        GamePanel.Invalidate();
         NextBlockGroup.Invalidate();
         HeldBlockGroup.Invalidate();
     }
@@ -171,50 +182,22 @@ public partial class MainForm : Form
 
     #region отрисовка
 
-    private void Draw(Graphics graphics)
-    {
-        DrawGrid(graphics);
-        if (_game != null)
-        {
-            DrawLines(graphics, _game.GameGrid);
-            if (IsGhostEnable.Checked)
-            {
-                DrawGhostBlock(graphics, _game.CurrentBlock);
-            }
-
-            DrawBlock(graphics, _game.CurrentBlock);
-            LableScore.Text = $@"Результат:  {_game.Score}";
-        }
-    }
-
     // отрисовка сетки
-    private void DrawGrid(Graphics graphics)
-    {
-        for (var row = 0; row <= _rows; row++)
-        {
-            graphics.DrawLine(Pens.Gray, new Point(_gameFieldOffset.X, _gameFieldOffset.Y + row * _cellSize),
-                new Point(_gameFieldOffset.X + _columns * _cellSize, _gameFieldOffset.Y + row * _cellSize));
-        }
-
-        for (var column = 0; column <= _columns; column++)
-        {
-            graphics.DrawLine(Pens.Gray, new Point(_gameFieldOffset.X + column * _cellSize, _gameFieldOffset.Y),
-                new Point(_gameFieldOffset.X + column * _cellSize, _gameFieldOffset.Y + _rows * _cellSize));
-        }
-    }
-
-    // отрисовка заполненных линий
-    private void DrawLines(Graphics graphics, GameGrid gameGrid)
+    private void DrawGrid(Graphics graphics, GameGrid gameGrid)
     {
         for (var row = 0; row < gameGrid.Rows; row++)
         {
             for (var column = 0; column < gameGrid.Columns; column++)
             {
-                var name = gameGrid[row, column];
-                if (!string.IsNullOrEmpty(name))
+                var rect = new Rectangle(new Point(column * _cellSize, row * _cellSize), _size);
+                var color = gameGrid[row, column];
+                if (color == 0)
                 {
-                    graphics.FillRectangle(Brushes.DarkGray,
-                        new Rectangle(new Point(_gameFieldOffset.X + column * _cellSize, _gameFieldOffset.Y + row * _cellSize), _size));
+                    graphics.DrawRectangle(Pens.Gray, rect);
+                }
+                else
+                {
+                    graphics.FillRectangle(new SolidBrush(Color.FromArgb(color)), rect);
                 }
             }
         }
@@ -230,7 +213,7 @@ public partial class MainForm : Form
                 continue;
             }
             graphics.FillRectangle(new SolidBrush(Color.FromArgb(currentBlock.ArgbColor)),
-                new Rectangle(new Point(_gameFieldOffset.X + position.Column * _cellSize, _gameFieldOffset.Y + position.Row * _cellSize), _size));
+                new Rectangle(new Point(position.Column * _cellSize, position.Row * _cellSize), _size));
         }
     }
 
@@ -242,7 +225,7 @@ public partial class MainForm : Form
         {
             graphics.FillRectangle(Brushes.LightGray,
                 new Rectangle(
-                    new Point(_gameFieldOffset.X + position.Column * _cellSize, _gameFieldOffset.Y + (position.Row + dropDistance) * _cellSize),
+                    new Point(position.Column * _cellSize, (position.Row + dropDistance) * _cellSize),
                     _size));
         }
     }
@@ -257,5 +240,5 @@ public partial class MainForm : Form
         }
     }
 
-    #endregion
+    #endregion   
 }

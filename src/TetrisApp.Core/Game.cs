@@ -12,15 +12,6 @@ public class Game
         {
             _currentBlock = value;
             _currentBlock.Reset();
-
-            for (var i = 0; i < 2; i++)
-            {
-                _currentBlock.Move(1, 0);
-                if (!BlockFits())
-                {
-                    _currentBlock.Move(-1, 0);
-                }
-            }
         }
     }
 
@@ -34,8 +25,9 @@ public class Game
     public Game(int rows, int columns, IBlockStorage? blockStorage)
     {
         GameGrid = new GameGrid(rows, columns);
-        BlockQueue = new BlockQueue(blockStorage);
-        _currentBlock = BlockQueue.GetAndUpdate();
+        var offset = new Position(0, (columns - 3) / 2);
+        BlockQueue = new BlockQueue(blockStorage, offset);
+        CurrentBlock = BlockQueue.GetAndUpdate();
         _canHold = true;
     }
 
@@ -119,7 +111,7 @@ public class Game
     {
         foreach (var position in CurrentBlock.TilePositions())
         {
-            GameGrid[position.Row, position.Column] = CurrentBlock.Name;
+            GameGrid[position.Row, position.Column] = CurrentBlock.ArgbColor;
         }
 
         Score += GameGrid.ClearFullRows();

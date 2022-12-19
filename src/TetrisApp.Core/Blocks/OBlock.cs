@@ -7,5 +7,4 @@ public class OBlock : Block
     public override Position[][] Tiles { get; set; } = {
         new Position[]{new(0,0), new(0,1), new(1,0), new(1,1)}
     };
-    protected override Position StartOffset => new(0, 4);
 }

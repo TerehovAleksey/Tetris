@@ -2,12 +2,12 @@
 
 public class GameGrid
 {
-    private readonly string[,] _grid;
+    private readonly int[,] _grid;
 
     public int Rows { get; }
     public int Columns { get; }
 
-    public string this[int row, int column]
+    public int this[int row, int column]
     {
         get => _grid[row, column];
         set => _grid[row, column] = value;
@@ -15,7 +15,7 @@ public class GameGrid
 
     public GameGrid(int rows, int columns)
     {
-        _grid = new string[rows, columns];
+        _grid = new int[rows, columns];
         Rows = rows;
         Columns = columns;
     }
@@ -42,13 +42,13 @@ public class GameGrid
     #region Private Methods
 
     private bool IsInside(int row, int column) => row >= 0 && row < Rows && column >= 0 && column < Columns;
-    public bool IsEmpty(int row, int column) => IsInside(row, column) && string.IsNullOrEmpty(_grid[row, column]);
+    public bool IsEmpty(int row, int column) => IsInside(row, column) && _grid[row, column] == 0;
 
     private bool IsRowFull(int row)
     {
         for (var column = 0; column < Columns; column++)
         {
-            if (string.IsNullOrEmpty(_grid[row, column]))
+            if (_grid[row, column] == 0)
             {
                 return false;
             }
@@ -61,7 +61,7 @@ public class GameGrid
     {
         for (var column = 0; column < Columns; column++)
         {
-            if (!string.IsNullOrEmpty(_grid[row, column]))
+            if (_grid[row, column] != 0)
             {
                 return false;
             }
@@ -74,7 +74,7 @@ public class GameGrid
     {
         for (var column = 0; column < Columns; column++)
         {
-            _grid[row, column] = string.Empty;
+            _grid[row, column] = 0;
         }
     }
 
@@ -83,7 +83,7 @@ public class GameGrid
         for (var column = 0; column < Columns; column++)
         {
             _grid[row + numRows, column] = _grid[row, column];
-            _grid[row, column] = string.Empty;
+            _grid[row, column] = 0;
         }
     }
 
