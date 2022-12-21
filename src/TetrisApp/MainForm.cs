@@ -1,11 +1,7 @@
-using TetrisApp.Core;
-using TetrisApp.Core.Blocks;
-
 namespace TetrisApp;
 
 public partial class MainForm : Form
 {
-    private int _cellSize;
     private Size _size;
     private System.Windows.Forms.Timer? _timer;
     private Game? _game;
@@ -26,8 +22,7 @@ public partial class MainForm : Form
 
     private void InitializeGame()
     {
-        _cellSize = 50;
-        _size = new Size(_cellSize, _cellSize);
+        _size = new Size(50, 50);
 
         _rows = (int)RowsSelector.Value;
         _columns = (int)ColumnsSelector.Value;
@@ -35,14 +30,14 @@ public partial class MainForm : Form
 
     private void InitializeSize()
     {
-        GamePanel.Width = _cellSize * _columns;
-        GamePanel.Height = _cellSize * _rows;
+        GamePanel.Width = _size.Width * _columns;
+        GamePanel.Height = _size.Height * _rows;
         
         Width = GamePanel.Width + InfoPanel.Width + 100;
         Height = GamePanel.Height + 100;
     }
 
-    #region обработчики
+    #region handlers
 
     private void Timer_Tick(object? sender, EventArgs e)
     {
@@ -75,13 +70,14 @@ public partial class MainForm : Form
     {
         if (_game != null)
         {
-            DrawGrid(e.Graphics, _game.GameGrid);
+            Drawing.DrawGrid(e.Graphics, _game.GameGrid, _size);
             if (IsGhostEnable.Checked)
             {
-                DrawGhostBlock(e.Graphics, _game.CurrentBlock);
+                var dropDistance = _game?.BlockDropDistance() ?? 0;
+                Drawing.DrawGhostBlock(e.Graphics, _game!.CurrentBlock, dropDistance, _size);
             }
 
-            DrawBlock(e.Graphics, _game.CurrentBlock);
+            Drawing.DrawBlock(e.Graphics, _game.CurrentBlock, _size);
             LableScore.Text = $@"–езультат:  {_game.Score}";
         }
     }
@@ -90,7 +86,7 @@ public partial class MainForm : Form
     {
         if (_game != null)
         {
-            DrawHintBlock(e.Graphics, _game.BlockQueue.NextBlock);
+            Drawing.DrawHintBlock(e.Graphics, _game.BlockQueue.NextBlock, _size);
         }
     }
 
@@ -98,7 +94,7 @@ public partial class MainForm : Form
     {
         if (_game != null && _game.HeldBlock is not null)
         {
-            DrawHintBlock(e.Graphics, _game.HeldBlock);
+            Drawing.DrawHintBlock(e.Graphics, _game.HeldBlock, _size);
         }
     }
 
@@ -178,67 +174,5 @@ public partial class MainForm : Form
         editor.ShowDialog();
     }
 
-    #endregion
-
-    #region отрисовка
-
-    // отрисовка сетки
-    private void DrawGrid(Graphics graphics, GameGrid gameGrid)
-    {
-        for (var row = 0; row < gameGrid.Rows; row++)
-        {
-            for (var column = 0; column < gameGrid.Columns; column++)
-            {
-                var rect = new Rectangle(new Point(column * _cellSize, row * _cellSize), _size);
-                var color = gameGrid[row, column];
-                if (color == 0)
-                {
-                    graphics.DrawRectangle(Pens.Gray, rect);
-                }
-                else
-                {
-                    graphics.FillRectangle(new SolidBrush(Color.FromArgb(color)), rect);
-                }
-            }
-        }
-    }
-
-    // отрисовка блока
-    private void DrawBlock(Graphics graphics, Block currentBlock)
-    {
-        foreach (var position in currentBlock.TilePositions())
-        {
-            if (position.Column < 0 || position.Row < 0)
-            {
-                continue;
-            }
-            graphics.FillRectangle(new SolidBrush(Color.FromArgb(currentBlock.ArgbColor)),
-                new Rectangle(new Point(position.Column * _cellSize, position.Row * _cellSize), _size));
-        }
-    }
-
-    // отрисовка подсказки
-    private void DrawGhostBlock(Graphics graphics, Block currentBlock)
-    {
-        var dropDistance = _game?.BlockDropDistance() ?? 0;
-        foreach (var position in currentBlock.TilePositions())
-        {
-            graphics.FillRectangle(Brushes.LightGray,
-                new Rectangle(
-                    new Point(position.Column * _cellSize, (position.Row + dropDistance) * _cellSize),
-                    _size));
-        }
-    }
-
-    // отрисовка следующего блока, спр€танного блока
-    private void DrawHintBlock(Graphics graphics, Block block)
-    {
-        foreach (var p in block.Tiles[0])
-        {
-            graphics.FillRectangle(new SolidBrush(Color.FromArgb(block.ArgbColor)),
-                new Rectangle(new Point(70 + p.Column * _cellSize, 100 + p.Row * _cellSize), _size));
-        }
-    }
-
-    #endregion   
+    #endregion 
 }

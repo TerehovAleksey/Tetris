@@ -1,9 +1,4 @@
-﻿using System.Diagnostics;
-using System.Text.Json;
-using TetrisApp.Core;
-using TetrisApp.Core.Blocks;
-
-namespace TetrisApp;
+﻿namespace TetrisApp;
 
 public class BlockStorage : IBlockStorage
 {
@@ -26,29 +21,17 @@ public class BlockStorage : IBlockStorage
             {
                 return JsonSerializer.Deserialize<List<UserBlock>>(json) ?? new List<UserBlock>();
             }
-            catch (Exception e)
+            catch
             {
-                Debug.WriteLine(e);
+                //ignore
             }
         }
 
         return new List<UserBlock>();
     }
 
-    public void CreateUserBlock(string name, Color color, Position[] positions)
+    public void SaveUserBlock(Block block)
     {
-        var str = color.ToArgb();
-
-        var block = new UserBlock()
-        {
-            Name = name,
-            ArgbColor = color.ToArgb(),
-            Tiles = new[]
-            {
-                positions
-            }
-        };
-
         var blocks = LoadUserBlocks().ToList();
         var exist = blocks.FirstOrDefault(x => x.Name == block.Name);
         if (exist is not null)

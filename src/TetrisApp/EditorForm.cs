@@ -1,52 +1,20 @@
-﻿using TetrisApp.Core;
-using TetrisApp.Core.Blocks;
-
-namespace TetrisApp
+﻿namespace TetrisApp
 {
     public partial class EditorForm : Form
     {
-        private int _rows;
-        private int _columns;
-        private int _cellSize;
-        private Size _size;
+        private readonly GameGrid _gameGrid = new(4, 4);
+        private readonly BlockStorage _blockStorage = new();
+
+        private readonly Size _size = new(50, 50);
+        private Color _color = Color.Black;
 
         private List<Block> _blocks = new();
-        private int _position;
-
-        private Color _color = Color.Black;
-        private List<Position> _tiles = new();
-
-        private readonly Dictionary<Position, Rectangle> _rectangles = new();
-        private readonly BlockStorage _blockStorage = new BlockStorage();
+        private Block _currentBlock = new UserBlock();
 
         public EditorForm()
         {
             InitializeComponent();
-            InitEditor();
-            InitGrid();
             LoadUserBlocks();
-        }
-
-        private void InitEditor()
-        {
-            _cellSize = 50;
-            _size = new Size(_cellSize, _cellSize);
-            _position = 0;
-            _rows = 4;
-            _columns = 4;
-        }
-
-        private void InitGrid()
-        {
-            for (var row = 0; row < _rows; row++)
-            {
-                for (var column = 0; column < _columns; column++)
-                {
-                    var position = new Position(row, column);
-                    var rect = new Rectangle(new Point(column * _cellSize, row * _cellSize), _size);
-                    _rectangles.Add(position, rect);
-                }
-            }
         }
 
         private void LoadUserBlocks()
@@ -61,7 +29,7 @@ namespace TetrisApp
             BlockSelector.DisplayMember = "Name";
         }
 
-        #region обработчики
+        #region handlers
 
         private void ButtonSave_Click(object sender, EventArgs e)
         {
@@ -71,7 +39,7 @@ namespace TetrisApp
                 return;
             }
 
-            _blockStorage.CreateUserBlock(TextBoxName.Text, _color, _tiles.ToArray());
+            _blockStorage.SaveUserBlock(_currentBlock);
             Close();
         }
 
@@ -82,6 +50,7 @@ namespace TetrisApp
                 var editedBlock = (Block)BlockSelector.SelectedItem;
                 _blockStorage.RemoveUserBlock(editedBlock.Name);
             }
+
             Close();
         }
 
@@ -89,72 +58,32 @@ namespace TetrisApp
         {
             if (BlockSelector.SelectedItem is not null)
             {
-                var editedBlock = (Block)BlockSelector.SelectedItem;
-
-                _tiles = editedBlock.Tiles.First().ToList();
-                _color = Color.FromArgb(editedBlock.ArgbColor);
-                TextBoxName.Text = editedBlock?.Name ?? string.Empty;
-                ButtonColor.BackColor = Color.FromArgb(editedBlock!.ArgbColor);
+                _currentBlock = (Block)BlockSelector.SelectedItem;
+                TextBoxName.Text = _currentBlock.Name;
+                ButtonColor.BackColor = Color.FromArgb(_currentBlock.ArgbColor);
                 EditPanel.Invalidate();
             }
         }
 
         private void EditPanel_Paint(object sender, PaintEventArgs e)
         {
-            DrawGrid(e.Graphics);
-            DrawBlock(e.Graphics);
-            LabelPosition.Text = $@"Позиция {_position + 1}";
+            Drawing.DrawGrid(e.Graphics, _gameGrid, _size);
+            Drawing.DrawBlock(e.Graphics, _currentBlock, _size);
+            LabelPosition.Text = $@"Позиция {_currentBlock.RotationState + 1}";
         }
 
         private void EditPanel_Click(object sender, EventArgs e)
         {
             var args = (MouseEventArgs)e;
-            foreach (var (position, value) in _rectangles)
+            var col = (int)Math.Ceiling((decimal)args.Location.X / _size.Width) - 1;
+            var row = (int)Math.Ceiling((decimal)args.Location.Y / _size.Height) - 1;
+
+            if (_currentBlock.RotationState > 0 || col >= _gameGrid.Columns || row >= _gameGrid.Rows)
             {
-                if (value.Contains(args.Location))
-                {
-                    if (_tiles.Contains(position))
-                    {
-                        // проверка на возможность удаления
-                        var canDelete = true;
-                        var neighbors = GetNeighbors(position);
-                        foreach (var neighbor in neighbors)
-                        {
-                            if (GetNeighbors(neighbor).Count() == 1)
-                            {
-                                canDelete = false;
-                            }
-                        }
-
-                        if (_tiles.Count <= 2)
-                        {
-                            canDelete = true;
-                        }
-
-                        if (canDelete)
-                        {
-                            _tiles.Remove(position);
-                        }
-                    }
-
-                    // проверка на возможность добавления
-                    else if (_tiles.Count < 8)
-                    {
-                        if (!_tiles.Any())
-                        {
-                            _tiles.Add(position);
-                        }
-                        else
-                        {
-                            if (GetNeighbors(position).Any())
-                            {
-                                _tiles.Add(position);
-                            }
-                        }
-                    }
-                }
+                return;
             }
 
+            _currentBlock.TryTogglePosition(new Position(row, col));
             EditPanel.Invalidate();
         }
 
@@ -164,60 +93,129 @@ namespace TetrisApp
             {
                 _color = colorDialog1.Color;
                 ButtonColor.BackColor = _color;
+                _currentBlock.ArgbColor = _color.ToArgb();
+
                 EditPanel.Invalidate();
             }
         }
 
         private void ButtonCwRotate_Click(object sender, EventArgs e)
         {
-            _position++;
-            if (_position == 4)
-            {
-                _position = 0;
-            }
-
+            _currentBlock.RotationCw();
             EditPanel.Invalidate();
         }
 
         private void ButtonCcwRotate_Click(object sender, EventArgs e)
         {
-            _position--;
-            if (_position == -1)
-            {
-                _position = 3;
-            }
-
+            _currentBlock.RotationCcw();
             EditPanel.Invalidate();
         }
 
-        #endregion
-
-        #region отрисовка
-
-        private void DrawGrid(Graphics graphics)
+        private void TextBoxName_TextChanged(object sender, EventArgs e)
         {
-            foreach (var rect in _rectangles.Values)
-            {
-                graphics.DrawRectangle(Pens.Gray, rect);
-            }
-        }
-
-        private void DrawBlock(Graphics graphics)
-        {
-            foreach (var tile in _tiles)
-            {
-                graphics.FillRectangle(new SolidBrush(_color), new Rectangle(new Point(tile.Column * _cellSize, tile.Row * _cellSize), _size));
-            }
+            _currentBlock.Name = TextBoxName.Text;
         }
 
         #endregion
+    }
 
-        private IEnumerable<Position> GetNeighbors(Position position)
+    internal static class BlockExtensions
+    {
+        internal static void TryTogglePosition(this Block block, Position position)
         {
-            return _tiles.Where(x => (x.Row == position.Row - 1 && x.Column == position.Column)
-                                     || (x.Row == position.Row + 1 && x.Column == position.Column)
-                                     || (x.Column == position.Column - 1 && x.Row == position.Row)
-                                     || (x.Column == position.Column + 1 && x.Row == position.Row));
+            var blockTiles = block.Tiles[0];
+
+            // убираем блок
+            if (blockTiles.Contains(position) && CanDeleteBlock(blockTiles, position))
+            {
+                blockTiles = blockTiles.Where(p => p != position).ToArray();
+                block.UpdateTiles(blockTiles);
+            }
+            // или добавляем блок
+            else if (!blockTiles.Contains(position) && CanAddBlock(blockTiles, position))
+            {
+                var newPos = blockTiles.ToList();
+                newPos.Add(position);
+                blockTiles = newPos.ToArray();
+                block.UpdateTiles(blockTiles);
+            }
+        }
+
+        private static void UpdateTiles(this Block block, Position[] defaultTiles)
+        {
+            var tiles = new Position[4][];
+            tiles[0] = defaultTiles;
+
+            var temp = new int[4, 4];
+            foreach (var tile in defaultTiles)
+            {
+                temp[tile.Row, tile.Column] = 1;
+            }
+
+            for (var i = 3; i > 0; i--)
+            {
+                var positions = new List<Position>();
+                temp = RotateMatrix(temp);
+                for (var r = 0; r < temp.GetLength(0); r++)
+                {
+                    for (var c = 0; c < temp.GetLength(1); c++)
+                    {
+                        if (temp[r, c] == 1)
+                        {
+                            positions.Add(new Position(r, c));
+                        }
+                    }
+                }
+
+                tiles[i] = positions.ToArray();
+            }
+
+            block.Tiles = tiles;
+        }
+
+        private static int[,] RotateMatrix(int[,] oldMatrix)
+        {
+            var newMatrix = new int[oldMatrix.GetLength(1), oldMatrix.GetLength(0)];
+            int newColumn, newRow = 0;
+            for (var oldColumn = oldMatrix.GetLength(1) - 1; oldColumn >= 0; oldColumn--)
+            {
+                newColumn = 0;
+                for (var oldRow = 0; oldRow < oldMatrix.GetLength(0); oldRow++)
+                {
+                    newMatrix[newRow, newColumn] = oldMatrix[oldRow, oldColumn];
+                    newColumn++;
+                }
+
+                newRow++;
+            }
+
+            return newMatrix;
+        }
+
+        private static bool CanAddBlock(Position[] tiles, Position position)
+        {
+            if (tiles.Length >= 8)
+            {
+                return false;
+            }
+
+            var hasNeighbors = tiles.Any(t => (t.Row == position.Row - 1 && t.Column == position.Column)
+                                     || (t.Row == position.Row + 1 && t.Column == position.Column)
+                                     || (t.Column == position.Column - 1 && t.Row == position.Row)
+                                     || (t.Column == position.Column + 1 && t.Row == position.Row));
+
+            if (tiles.Length > 1 && !hasNeighbors)
+            {
+                return false;
+            }
+
+            return true;
+        }
+
+        private static bool CanDeleteBlock(Position[] tiles, Position position)
+        {
+            //TODO: fix
+            return true;
         }
     }
 }

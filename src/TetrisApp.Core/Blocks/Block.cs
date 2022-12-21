@@ -6,6 +6,8 @@ public abstract class Block
     private Position _offset;
     private Position _startOffset;
 
+    public int RotationState => _rotationState;
+
     public abstract Position[][] Tiles { get; set; }
     public abstract int ArgbColor { get; set; }
     public abstract string Name { get; set; }

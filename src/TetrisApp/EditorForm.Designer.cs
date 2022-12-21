@@ -30,7 +30,7 @@
         {
             this.BlockSelector = new System.Windows.Forms.ComboBox();
             this.label1 = new System.Windows.Forms.Label();
-            this.EditPanel = new System.Windows.Forms.Panel();
+            this.EditPanel = new System.Windows.Forms.PictureBox();
             this.ButtonSave = new System.Windows.Forms.Button();
             this.ButtonDelete = new System.Windows.Forms.Button();
             this.ButtonCwRotate = new System.Windows.Forms.Button();
@@ -43,6 +43,8 @@
             this.ButtonColor = new System.Windows.Forms.Button();
             this.LabelPosition = new System.Windows.Forms.Label();
             this.label5 = new System.Windows.Forms.Label();
+            this.label6 = new System.Windows.Forms.Label();
+            ((System.ComponentModel.ISupportInitialize)(this.EditPanel)).BeginInit();
             this.SuspendLayout();
             // 
             // BlockSelector
@@ -69,12 +71,13 @@
             this.EditPanel.Name = "EditPanel";
             this.EditPanel.Size = new System.Drawing.Size(256, 241);
             this.EditPanel.TabIndex = 2;
+            this.EditPanel.TabStop = false;
             this.EditPanel.Click += new System.EventHandler(this.EditPanel_Click);
             this.EditPanel.Paint += new System.Windows.Forms.PaintEventHandler(this.EditPanel_Paint);
             // 
             // ButtonSave
             // 
-            this.ButtonSave.Location = new System.Drawing.Point(27, 561);
+            this.ButtonSave.Location = new System.Drawing.Point(32, 593);
             this.ButtonSave.Name = "ButtonSave";
             this.ButtonSave.Size = new System.Drawing.Size(280, 53);
             this.ButtonSave.TabIndex = 3;
@@ -84,7 +87,7 @@
             // 
             // ButtonDelete
             // 
-            this.ButtonDelete.Location = new System.Drawing.Point(313, 561);
+            this.ButtonDelete.Location = new System.Drawing.Point(318, 593);
             this.ButtonDelete.Name = "ButtonDelete";
             this.ButtonDelete.Size = new System.Drawing.Size(280, 53);
             this.ButtonDelete.TabIndex = 4;
@@ -94,7 +97,6 @@
             // 
             // ButtonCwRotate
             // 
-            this.ButtonCwRotate.Enabled = false;
             this.ButtonCwRotate.Image = global::TetrisApp.Properties.Resources.cw;
             this.ButtonCwRotate.Location = new System.Drawing.Point(417, 154);
             this.ButtonCwRotate.Name = "ButtonCwRotate";
@@ -105,7 +107,6 @@
             // 
             // ButtonCcwRotate
             // 
-            this.ButtonCcwRotate.Enabled = false;
             this.ButtonCcwRotate.Image = global::TetrisApp.Properties.Resources.ccw;
             this.ButtonCcwRotate.Location = new System.Drawing.Point(417, 253);
             this.ButtonCcwRotate.Name = "ButtonCcwRotate";
@@ -138,6 +139,7 @@
             this.TextBoxName.Name = "TextBoxName";
             this.TextBoxName.Size = new System.Drawing.Size(238, 31);
             this.TextBoxName.TabIndex = 9;
+            this.TextBoxName.TextChanged += new System.EventHandler(this.TextBoxName_TextChanged);
             // 
             // label4
             // 
@@ -177,11 +179,21 @@
             this.label5.TabIndex = 14;
             this.label5.Text = "Для создания новой фигуры ввести новое имя и отредактировать";
             // 
+            // label6
+            // 
+            this.label6.AutoSize = true;
+            this.label6.Location = new System.Drawing.Point(27, 544);
+            this.label6.Name = "label6";
+            this.label6.Size = new System.Drawing.Size(393, 25);
+            this.label6.TabIndex = 15;
+            this.label6.Text = "Редактирование доступно только в позиции 1";
+            // 
             // EditorForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(10F, 25F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(615, 636);
+            this.ClientSize = new System.Drawing.Size(625, 671);
+            this.Controls.Add(this.label6);
             this.Controls.Add(this.label5);
             this.Controls.Add(this.LabelPosition);
             this.Controls.Add(this.ButtonColor);
@@ -200,6 +212,7 @@
             this.Name = "EditorForm";
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterParent;
             this.Text = "Редактор";
+            ((System.ComponentModel.ISupportInitialize)(this.EditPanel)).EndInit();
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -209,7 +222,7 @@
 
         private ComboBox BlockSelector;
         private Label label1;
-        private Panel EditPanel;
+        private PictureBox EditPanel;
         private Button ButtonSave;
         private Button ButtonDelete;
         private Button ButtonCwRotate;
@@ -222,5 +235,6 @@
         private Button ButtonColor;
         private Label LabelPosition;
         private Label label5;
+        private Label label6;
     }
 }
